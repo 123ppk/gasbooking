@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gas Delivery Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#2563eb;
+  --success:#16a34a;
+  --danger:#ff4d4f;
+  --bg:#f6f6f6;
+  --card:#ffffff;
+  --text:#111;
+  --muted:#6b7280;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
+body{background:var(--bg);padding:20px;}
+.container{max-width:1200px;margin:auto;}
+h2,h3{color:var(--primary);margin-bottom:10px;}
+button{padding:8px 16px;margin:2px;border:none;border-radius:6px;color:#fff;font-weight:600;cursor:pointer;transition:0.3s;}
+button.accent{background:var(--primary);}
+button.accent:hover{background:#1d4ed8;}
+button.success{background:var(--success);}
+button.success:hover{background:#15803d;}
+button.danger{background:var(--danger);}
+button.danger:hover{background:#b91c1c;}
+input,select{padding:8px;margin:5px 0;width:100%;border-radius:6px;border:1px solid #ccc;outline:none;transition:0.3s;}
+input:focus, select:focus{border-color:var(--primary);}
+.card{background:var(--card);padding:16px;margin:12px 0;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1);display:flex;justify-content:space-between;flex-wrap:wrap;}
+.card-info{flex:1;min-width:220px;}
+.card-actions{text-align:right;min-width:150px;display:flex;flex-direction:column;gap:6px;}
+.status-badge{padding:4px 10px;border-radius:6px;font-weight:600;color:#fff;font-size:0.9rem;}
+.status-pending{background:#f59e0b;}
+.status-delivered{background:var(--success);}
+.role-select{padding:12px 20px;border-radius:8px;border:1px solid #ccc;margin-bottom:20px;width:250px;}
+.hide{display:none;}
+.flex-center{display:flex;justify-content:center;align-items:center;flex-direction:column;}
+@media(max-width:768px){.card{flex-direction:column;}.card-actions{text-align:left;flex-direction:row;justify-content:flex-start;}}
+</style>
+</head>
+<body>
+<div class="container flex-center">
+
+  <!-- Login Page -->
+  <div id="loginPage" class="flex-center">
+    <h2>Gas Delivery Management</h2>
+    <select id="roleSelect" class="role-select">
+      <option value="">Select Role</option>
+      <option value="admin">Admin</option>
+      <option value="user">User</option>
+      <option value="delivery">Delivery Boy</option>
+    </select>
+    <input type="text" id="userNameInput" placeholder="Enter Name" class="role-select" style="width:250px;">
+    <button id="loginBtn" class="accent">Login</button>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="adminPanel" class="hide">
+    <h2>Admin Panel</h2>
+    <div>
+      <h3>Add Society Member</h3>
+      <input type="text" id="societyName" placeholder="Society Name">
+      <input type="text" id="memberName" placeholder="Member Name">
+      <input type="text" id="phone" placeholder="Phone Number">
+      <input type="text" id="address" placeholder="Address">
+      <button id="addMemberBtn" class="accent">Add Member</button>
+    </div>
+    <div>
+      <h3>Create Gas Delivery Card</h3>
+      <select id="selectMember"></select>
+      <input type="number" id="gasNo" placeholder="Gas Number (1,2,3...)">
+      <input type="number" id="payment" placeholder="Payment (Rs)">
+      <input type="date" id="startDate">
+      <input type="date" id="endDate">
+      <input type="file" id="barcodeFile" accept="image/*">
+      <button id="createCardBtn" class="accent">Create Card</button>
+    </div>
+    <div>
+      <h3>All Cards</h3>
+      <div id="allCardsAdmin"></div>
+    </div>
+    <button id="adminLogoutBtn" class="danger">Logout</button>
+  </div>
+
+  <!-- User Panel -->
+  <div id="userPanel" class="hide">
+    <h2>User Panel</h2>
+    <h3>My Cards</h3>
+    <div id="userCards"></div>
+    <button id="userLogoutBtn" class="danger">Logout</button>
+  </div>
+
+  <!-- Delivery Panel -->
+  <div id="deliveryPanel" class="hide">
+    <h2>Delivery Boy Panel</h2>
+    <h3>Assigned Cards</h3>
+    <div id="deliveryCards"></div>
+    <button id="deliveryLogoutBtn" class="danger">Logout</button>
+  </div>
+
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+<script>
+// ======= Firebase Setup =======
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "SENDER_ID",
+  appId: "APP_ID"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ======= Data =======
+let members = [];
+let cards = [];
+
+// ======= Elements =======
+const loginPage=document.getElementById('loginPage');
+const roleSelect=document.getElementById('roleSelect');
+const userNameInput=document.getElementById('userNameInput');
+const loginBtn=document.getElementById('loginBtn');
+
+const adminPanel=document.getElementById('adminPanel');
+const userPanel=document.getElementById('userPanel');
+const deliveryPanel=document.getElementById('deliveryPanel');
+
+const societyName=document.getElementById('societyName');
+const memberName=document.getElementById('memberName');
+const phone=document.getElementById('phone');
+const address=document.getElementById('address');
+const addMemberBtn=document.getElementById('addMemberBtn');
+const selectMember=document.getElementById('selectMember');
+const gasNo=document.getElementById('gasNo');
+const payment=document.getElementById('payment');
+const startDate=document.getElementById('startDate');
+const endDate=document.getElementById('endDate');
+const barcodeFile=document.getElementById('barcodeFile');
+const createCardBtn=document.getElementById('createCardBtn');
+const allCardsAdmin=document.getElementById('allCardsAdmin');
+const adminLogoutBtn=document.getElementById('adminLogoutBtn');
+
+const userCards=document.getElementById('userCards');
+const userLogoutBtn=document.getElementById('userLogoutBtn');
+
+const deliveryCards=document.getElementById('deliveryCards');
+const deliveryLogoutBtn=document.getElementById('deliveryLogoutBtn');
+
+let currentUser='';
+
+// ======= Firebase Sync Functions =======
+function loadFirebaseData(){
+  // Members
+  db.ref('members').on('value', snapshot=>{
+    members = snapshot.val() ? Object.values(snapshot.val()) : [];
+    loadMembers(); loadUserCards(); loadDeliveryCards(); loadCardsAdmin();
+  });
+  // Cards
+  db.ref('cards').on('value', snapshot=>{
+    cards = snapshot.val() ? Object.values(snapshot.val()) : [];
+    loadUserCards(); loadDeliveryCards(); loadCardsAdmin();
+  });
+}
+
+function saveMemberFirebase(member){
+  db.ref('members/'+member.id).set(member);
+}
+
+function saveCardFirebase(card){
+  db.ref('cards/'+card.id).set(card);
+}
+
+function updateCardFirebase(card){
+  db.ref('cards/'+card.id).set(card);
+}
+
+function deleteCardFirebase(id){
+  db.ref('cards/'+id).remove();
+}
+
+// ======= Login =======
+loginBtn.onclick=()=>{
+  let role=roleSelect.value; let name=userNameInput.value.trim();
+  if(!role||!name)return alert('Select role and enter name');
+  currentUser=name;
+  loginPage.classList.add('hide');
+  if(role==='admin'){adminPanel.classList.remove('hide');}
+  if(role==='user'){userPanel.classList.remove('hide');}
+  if(role==='delivery'){deliveryPanel.classList.remove('hide');}
+  loadFirebaseData();
+}
+
+// Logout
+adminLogoutBtn.onclick=()=>{location.reload();}
+userLogoutBtn.onclick=()=>{location.reload();}
+deliveryLogoutBtn.onclick=()=>{location.reload();}
+
+// ======= Admin Functions =======
+// Add Member
+addMemberBtn.onclick=()=>{
+  if(!societyName.value||!memberName.value||!phone.value) return alert('Fill all fields');
+  let member={id:Date.now(),society:societyName.value,name:memberName.value,phone:phone.value,address:address.value};
+  saveMemberFirebase(member);
+  societyName.value=''; memberName.value=''; phone.value=''; address.value='';
+  alert('Member Added');
+}
+
+// Load members in select
+function loadMembers(){
+  selectMember.innerHTML='';
+  members.forEach(m=>{
+    let option=document.createElement('option'); option.value=m.id;
+    option.textContent=m.name+' ('+m.society+')';
+    selectMember.appendChild(option);
+  });
+}
+
+// Create Card
+createCardBtn.onclick=()=>{
+  if(!selectMember.value||!gasNo.value||!payment.value||!startDate.value||!endDate.value)return alert('Fill all fields');
+  let member=members.find(m=>m.id==selectMember.value);
+  if(barcodeFile.files.length>0){
+    let reader=new FileReader();
+    reader.onload=function(e){ createCardFirebase(member,e.target.result); }
+    reader.readAsDataURL(barcodeFile.files[0]);
+  } else { createCardFirebase(member,''); }
+}
+function createCardFirebase(member,barcode){
+  let card={id:Date.now(),memberId:member.id,name:member.name,society:member.society,phone:member.phone,address:member.address,gasNo:gasNo.value,payment:payment.value,startDate:startDate.value,endDate:endDate.value,status:'Pending',barcode:barcode};
+  saveCardFirebase(card);
+  gasNo.value=''; payment.value=''; startDate.value=''; endDate.value=''; barcodeFile.value='';
+}
+
+// ======= Card Operations =======
+function markDelivered(id){ 
+  let c=cards.find(x=>x.id===id); 
+  if(c){c.status='Delivered'; updateCardFirebase(c);} 
+}
+
+function deleteCard(id){ deleteCardFirebase(id); }
+
+// ======= Panels Rendering =======
+function loadCardsAdmin(){
+  allCardsAdmin.innerHTML='';
+  cards.forEach(c=>{
+    let cardDiv=document.createElement('div'); cardDiv.className='card';
+    cardDiv.innerHTML=`<div class="card-info">
+      <strong>${c.name} (${c.society})</strong><br>
+      Phone: ${c.phone}<br>Address: ${c.address}<br>
+      Gas No: ${c.gasNo}<br>Payment: Rs ${c.payment}<br>
+      Start: ${c.startDate} End: ${c.endDate}<br>
+      Status: <span class="status-badge ${c.status==='Pending'?'status-pending':'status-delivered'}">${c.status}</span>
+    </div>
+    <div class="card-actions">
+      <button class="success" onclick="markDelivered(${c.id})">Delivered</button>
+      <button class="danger" onclick="deleteCard(${c.id})">Delete</button>
+    </div>`;
+    allCardsAdmin.appendChild(cardDiv);
+  });
+}
+
+function loadUserCards(){
+  userCards.innerHTML='';
+  let userCardsList=cards.filter(c=>c.name===currentUser);
+  userCardsList.forEach(c=>{
+    let cardDiv=document.createElement('div'); cardDiv.className='card';
+    cardDiv.innerHTML=`<div class="card-info">
+      <strong>${c.name} (${c.society})</strong><br>
+      Gas No: ${c.gasNo}<br>
+      Payment: Rs ${c.payment}<br>
+      Status: <span class="status-badge ${c.status==='Pending'?'status-pending':'status-delivered'}">${c.status}</span><br>
+      Start: ${c.startDate} End: ${c.endDate}<br>
+      ${c.barcode?'<img src="'+c.barcode+'" alt="Barcode" style="max-width:150px;margin-top:5px;">':''}
+    </div>`;
+    userCards.appendChild(cardDiv);
+  });
+}
+
+function loadDeliveryCards(){
+  deliveryCards.innerHTML='';
+  let today=new Date().toISOString().split('T')[0];
+  let pendingCards=cards.filter(c=>c.status==='Pending' && c.startDate<=today && c.endDate>=today);
+  pendingCards.forEach(c=>{
+    let cardDiv=document.createElement('div'); cardDiv.className='card';
+    cardDiv.innerHTML=`<div class="card-info">
+      <strong>${c.name} (${c.society})</strong><br>
+      Gas No: ${c.gasNo}<br>Phone: ${c.phone}<br>Address: ${c.address}<br>
+      Status: <span class="status-badge status-pending">${c.status}</span><br>
+      ${c.barcode?'<img src="'+c.barcode+'" alt="Barcode" style="max-width:150px;margin-top:5px;">':''}
+    </div>
+    <div class="card-actions">
+      <button class="success" onclick="markDelivered(${c.id})">Delivered</button>
+    </div>`;
+    deliveryCards.appendChild(cardDiv);
+  });
+}
+</script>
+</body>
+</html>
