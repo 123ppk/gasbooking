@@ -108,13 +108,13 @@ input:focus, select:focus{border-color:var(--primary);}
 <script>
 // ======= Firebase Setup =======
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "SENDER_ID",
-  appId: "APP_ID"
+  apiKey: "AIzaSyARRGuy8RIUifqadGxzF3BF3O4MAVFvfyo",
+  authDomain: "gasbooking-95fd5.firebaseapp.com",
+  databaseURL: "https://gasbooking-95fd5-default-rtdb.firebaseio.com",
+  projectId: "gasbooking-95fd5",
+  storageBucket: "gasbooking-95fd5.appspot.com",
+  messagingSenderId: "1025660657409",
+  appId: "1:1025660657409:web:84f0b8e44440e01f7ac500"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
@@ -158,38 +158,27 @@ let currentUser='';
 
 // ======= Firebase Sync Functions =======
 function loadFirebaseData(){
-  // Members
+  // Members listener
   db.ref('members').on('value', snapshot=>{
     members = snapshot.val() ? Object.values(snapshot.val()) : [];
     loadMembers(); loadUserCards(); loadDeliveryCards(); loadCardsAdmin();
   });
-  // Cards
+  // Cards listener
   db.ref('cards').on('value', snapshot=>{
     cards = snapshot.val() ? Object.values(snapshot.val()) : [];
     loadUserCards(); loadDeliveryCards(); loadCardsAdmin();
   });
 }
 
-function saveMemberFirebase(member){
-  db.ref('members/'+member.id).set(member);
-}
-
-function saveCardFirebase(card){
-  db.ref('cards/'+card.id).set(card);
-}
-
-function updateCardFirebase(card){
-  db.ref('cards/'+card.id).set(card);
-}
-
-function deleteCardFirebase(id){
-  db.ref('cards/'+id).remove();
-}
+function saveMemberFirebase(member){ db.ref('members/'+member.id).set(member); }
+function saveCardFirebase(card){ db.ref('cards/'+card.id).set(card); }
+function updateCardFirebase(card){ db.ref('cards/'+card.id).set(card); }
+function deleteCardFirebase(id){ db.ref('cards/'+id).remove(); }
 
 // ======= Login =======
 loginBtn.onclick=()=>{
-  let role=roleSelect.value; let name=userNameInput.value.trim();
-  if(!role||!name)return alert('Select role and enter name');
+  const role=roleSelect.value; const name=userNameInput.value.trim();
+  if(!role||!name){ alert('Select role and enter name'); return; }
   currentUser=name;
   loginPage.classList.add('hide');
   if(role==='admin'){adminPanel.classList.remove('hide');}
@@ -206,9 +195,22 @@ deliveryLogoutBtn.onclick=()=>{location.reload();}
 // ======= Admin Functions =======
 // Add Member
 addMemberBtn.onclick=()=>{
-  if(!societyName.value||!memberName.value||!phone.value) return alert('Fill all fields');
-  let member={id:Date.now(),society:societyName.value,name:memberName.value,phone:phone.value,address:address.value};
+  if(!societyName.value||!memberName.value||!phone.value){
+    alert('Fill all fields'); return;
+  }
+  const member={
+    id: Date.now(),
+    society: societyName.value,
+    name: memberName.value,
+    phone: phone.value,
+    address: address.value
+  };
+  // Save to Firebase
   saveMemberFirebase(member);
+  // Instant UI update for dropdown (keeps same design; helps if listener is still loading)
+  members.push(member);
+  loadMembers();
+
   societyName.value=''; memberName.value=''; phone.value=''; address.value='';
   alert('Member Added');
 }
@@ -217,41 +219,61 @@ addMemberBtn.onclick=()=>{
 function loadMembers(){
   selectMember.innerHTML='';
   members.forEach(m=>{
-    let option=document.createElement('option'); option.value=m.id;
-    option.textContent=m.name+' ('+m.society+')';
+    const option=document.createElement('option');
+    option.value=m.id;
+    option.textContent=`${m.name} (${m.society})`;
     selectMember.appendChild(option);
   });
 }
 
 // Create Card
 createCardBtn.onclick=()=>{
-  if(!selectMember.value||!gasNo.value||!payment.value||!startDate.value||!endDate.value)return alert('Fill all fields');
-  let member=members.find(m=>m.id==selectMember.value);
+  if(!selectMember.value||!gasNo.value||!payment.value||!startDate.value||!endDate.value){
+    alert('Fill all fields'); return;
+  }
+  const member=members.find(m=>String(m.id)===String(selectMember.value));
+  if(!member){ alert('Please add/select a member'); return; }
+
   if(barcodeFile.files.length>0){
-    let reader=new FileReader();
-    reader.onload=function(e){ createCardFirebase(member,e.target.result); }
+    const reader=new FileReader();
+    reader.onload=(e)=> createCardFirebase(member,e.target.result);
     reader.readAsDataURL(barcodeFile.files[0]);
-  } else { createCardFirebase(member,''); }
+  } else {
+    createCardFirebase(member,'');
+  }
 }
+
 function createCardFirebase(member,barcode){
-  let card={id:Date.now(),memberId:member.id,name:member.name,society:member.society,phone:member.phone,address:member.address,gasNo:gasNo.value,payment:payment.value,startDate:startDate.value,endDate:endDate.value,status:'Pending',barcode:barcode};
+  const card={
+    id: Date.now(),
+    memberId: member.id,
+    name: member.name,
+    society: member.society,
+    phone: member.phone,
+    address: member.address,
+    gasNo: gasNo.value,
+    payment: payment.value,
+    startDate: startDate.value,
+    endDate: endDate.value,
+    status: 'Pending',
+    barcode: barcode
+  };
   saveCardFirebase(card);
   gasNo.value=''; payment.value=''; startDate.value=''; endDate.value=''; barcodeFile.value='';
 }
 
 // ======= Card Operations =======
-function markDelivered(id){ 
-  let c=cards.find(x=>x.id===id); 
-  if(c){c.status='Delivered'; updateCardFirebase(c);} 
+function markDelivered(id){
+  const c=cards.find(x=>x.id===id);
+  if(c){ c.status='Delivered'; updateCardFirebase(c); }
 }
-
 function deleteCard(id){ deleteCardFirebase(id); }
 
 // ======= Panels Rendering =======
 function loadCardsAdmin(){
   allCardsAdmin.innerHTML='';
   cards.forEach(c=>{
-    let cardDiv=document.createElement('div'); cardDiv.className='card';
+    const cardDiv=document.createElement('div'); cardDiv.className='card';
     cardDiv.innerHTML=`<div class="card-info">
       <strong>${c.name} (${c.society})</strong><br>
       Phone: ${c.phone}<br>Address: ${c.address}<br>
@@ -269,9 +291,9 @@ function loadCardsAdmin(){
 
 function loadUserCards(){
   userCards.innerHTML='';
-  let userCardsList=cards.filter(c=>c.name===currentUser);
+  const userCardsList=cards.filter(c=>c.name===currentUser);
   userCardsList.forEach(c=>{
-    let cardDiv=document.createElement('div'); cardDiv.className='card';
+    const cardDiv=document.createElement('div'); cardDiv.className='card';
     cardDiv.innerHTML=`<div class="card-info">
       <strong>${c.name} (${c.society})</strong><br>
       Gas No: ${c.gasNo}<br>
@@ -286,10 +308,10 @@ function loadUserCards(){
 
 function loadDeliveryCards(){
   deliveryCards.innerHTML='';
-  let today=new Date().toISOString().split('T')[0];
-  let pendingCards=cards.filter(c=>c.status==='Pending' && c.startDate<=today && c.endDate>=today);
+  const today=new Date().toISOString().split('T')[0];
+  const pendingCards=cards.filter(c=>c.status==='Pending' && c.startDate<=today && c.endDate>=today);
   pendingCards.forEach(c=>{
-    let cardDiv=document.createElement('div'); cardDiv.className='card';
+    const cardDiv=document.createElement('div'); cardDiv.className='card';
     cardDiv.innerHTML=`<div class="card-info">
       <strong>${c.name} (${c.society})</strong><br>
       Gas No: ${c.gasNo}<br>Phone: ${c.phone}<br>Address: ${c.address}<br>
