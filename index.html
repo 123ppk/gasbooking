@@ -1,329 +1,649 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="mr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gas Delivery Management System</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Saree Bazaar — Demo (Single File)</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --primary:#2563eb;
-  --success:#16a34a;
-  --danger:#ff4d4f;
-  --bg:#f6f6f6;
-  --card:#ffffff;
-  --text:#111;
-  --muted:#6b7280;
-}
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Inter',sans-serif;}
-body{background:var(--bg);padding:20px;}
-.container{max-width:1200px;margin:auto;}
-h2,h3{color:var(--primary);margin-bottom:10px;}
-button{padding:8px 16px;margin:2px;border:none;border-radius:6px;color:#fff;font-weight:600;cursor:pointer;transition:0.3s;}
-button.accent{background:var(--primary);}
-button.accent:hover{background:#1d4ed8;}
-button.success{background:var(--success);}
-button.success:hover{background:#15803d;}
-button.danger{background:var(--danger);}
-button.danger:hover{background:#b91c1c;}
-input,select{padding:8px;margin:5px 0;width:100%;border-radius:6px;border:1px solid #ccc;outline:none;transition:0.3s;}
-input:focus, select:focus{border-color:var(--primary);}
-.card{background:var(--card);padding:16px;margin:12px 0;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1);display:flex;justify-content:space-between;flex-wrap:wrap;}
-.card-info{flex:1;min-width:220px;}
-.card-actions{text-align:right;min-width:150px;display:flex;flex-direction:column;gap:6px;}
-.status-badge{padding:4px 10px;border-radius:6px;font-weight:600;color:#fff;font-size:0.9rem;}
-.status-pending{background:#f59e0b;}
-.status-delivered{background:var(--success);}
-.role-select{padding:12px 20px;border-radius:8px;border:1px solid #ccc;margin-bottom:20px;width:250px;}
-.hide{display:none;}
-.flex-center{display:flex;justify-content:center;align-items:center;flex-direction:column;}
-@media(max-width:768px){.card{flex-direction:column;}.card-actions{text-align:left;flex-direction:row;justify-content:flex-start;}}
+  :root{
+    --bg:#fbfbfd; --card:#fff; --muted:#6b7280; --accent:#0b6ef6;
+    --radius:12px; font-family:Inter,system-ui,Segoe UI,Roboto,Arial;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#f7f9fc, #fbfbfd);color:#111;min-height:100vh}
+  .wrap{max-width:1100px;margin:18px auto;padding:18px}
+  header{display:flex;gap:12px;align-items:center;justify-content:space-between}
+  .brand{display:flex;gap:12px;align-items:center}
+  .logo{width:48px;height:48px;border-radius:10px;background:linear-gradient(135deg,#ff7a7a,#ffd36b);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px}
+  h1{margin:0;font-size:18px}
+  .controls{display:flex;gap:8px;align-items:center}
+  .btn{background:var(--card);border:1px solid #e6e9ef;padding:8px 12px;border-radius:10px;cursor:pointer}
+  .btn.primary{background:var(--accent);color:white;border:none;box-shadow:0 6px 18px rgba(11,110,246,0.12)}
+  .btn.ghost{background:transparent;border:1px dashed #e6e9ef}
+  .search{display:flex;gap:8px;align-items:center;background:var(--card);padding:8px;border-radius:10px;border:1px solid #eef2f8}
+  input.searchInput{border:none;outline:none;font-size:14px;background:transparent}
+  main{display:grid;grid-template-columns:1fr 320px;gap:18px;margin-top:18px}
+  @media (max-width:920px){ main{grid-template-columns:1fr} .aside{order:2} .content{order:1} }
+  .card{background:var(--card);border-radius:var(--radius);padding:12px;border:1px solid rgba(0,0,0,0.03)}
+  .productsGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+  .product{display:flex;flex-direction:column;gap:8px;border-radius:10px;overflow:hidden;border:1px solid #eef2f8}
+  .product .img{height:180px;background:#f2f6fb;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .product img{width:100%;height:100%;object-fit:cover}
+  .pbody{padding:10px}
+  .title{font-weight:600}
+  .muted{color:var(--muted);font-size:13px}
+  .price{font-weight:700}
+  .adminBanner{display:flex;gap:8px;align-items:center;padding:10px;border-radius:10px;background:linear-gradient(90deg,#fff8e6,#fff);border:1px solid #ffe7a8}
+  label.small{font-size:13px;color:var(--muted);display:block;margin-top:8px}
+  input[type=text],input[type=number],textarea,select{width:100%;padding:8px;border-radius:8px;border:1px solid #edf2f7;margin-top:6px;font-size:14px}
+  .small{font-size:13px;color:var(--muted)}
+  .cartList{max-height:300px;overflow:auto}
+  footer{margin-top:18px;text-align:center;color:var(--muted);font-size:13px}
+  .flex{display:flex;gap:8px;align-items:center}
+  .chip{padding:6px 8px;border-radius:999px;border:1px solid #eef2f8;background:#fff;font-size:13px}
+  /* nice touches */
+  .ghostInput{opacity:0.85}
 </style>
 </head>
 <body>
-<div class="container flex-center">
-
-  <!-- Login Page -->
-  <div id="loginPage" class="flex-center">
-    <h2>Gas Delivery Management</h2>
-    <select id="roleSelect" class="role-select">
-      <option value="">Select Role</option>
-      <option value="admin">Admin</option>
-      <option value="user">User</option>
-      <option value="delivery">Delivery Boy</option>
-    </select>
-    <input type="text" id="userNameInput" placeholder="Enter Name" class="role-select" style="width:250px;">
-    <button id="loginBtn" class="accent">Login</button>
-  </div>
-
-  <!-- Admin Panel -->
-  <div id="adminPanel" class="hide">
-    <h2>Admin Panel</h2>
-    <div>
-      <h3>Add Society Member</h3>
-      <input type="text" id="societyName" placeholder="Society Name">
-      <input type="text" id="memberName" placeholder="Member Name">
-      <input type="text" id="phone" placeholder="Phone Number">
-      <input type="text" id="address" placeholder="Address">
-      <button id="addMemberBtn" class="accent">Add Member</button>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">SB</div>
+      <div>
+        <h1>Saree Bazaar</h1>
+        <div class="small muted">Single-file demo • Responsive • Upload → show images</div>
+      </div>
     </div>
-    <div>
-      <h3>Create Gas Delivery Card</h3>
-      <select id="selectMember"></select>
-      <input type="number" id="gasNo" placeholder="Gas Number (1,2,3...)">
-      <input type="number" id="payment" placeholder="Payment (Rs)">
-      <input type="date" id="startDate">
-      <input type="date" id="endDate">
-      <input type="file" id="barcodeFile" accept="image/*">
-      <button id="createCardBtn" class="accent">Create Card</button>
+
+    <div class="controls">
+      <div class="search card" style="padding:8px 10px;">
+        <input id="searchInput" class="searchInput" placeholder="Search sarees, color, weave..." />
+        <select id="categoryFilter" style="border:none;background:transparent;font-size:13px">
+          <option value="">All Categories</option>
+        </select>
+      </div>
+
+      <button id="btnAdmin" class="btn">Admin</button>
+      <button id="btnCart" class="btn">Cart (<span id="cartCnt">0</span>)</button>
     </div>
-    <div>
-      <h3>All Cards</h3>
-      <div id="allCardsAdmin"></div>
+  </header>
+
+  <!-- ADMIN AREA (hidden until login) -->
+  <div id="adminPanel" style="display:none;margin-top:12px" class="card">
+    <div class="adminBanner">
+      <div style="flex:1">
+        <strong>Admin Mode</strong>
+        <div class="small muted" id="adminEmailShow">Not logged in</div>
+      </div>
+      <div>
+        <button id="btnLogout" class="btn">Logout</button>
+      </div>
     </div>
-    <button id="adminLogoutBtn" class="danger">Logout</button>
+
+    <div style="display:grid;grid-template-columns:1fr 320px;gap:12px;margin-top:12px">
+      <div>
+        <h3 style="margin:0 0 6px 0">Add / Edit Saree</h3>
+        <form id="productForm" class="card" style="padding:12px">
+          <input type="hidden" id="prodId" />
+          <label class="small">Title<input id="prodTitle" required placeholder="e.g. Banarasi Silk Saree" /></label>
+          <label class="small">Price (₹)<input id="prodPrice" type="number" required placeholder="e.g. 2500" /></label>
+          <label class="small">Category<select id="prodCategory"><option value="Silk">Silk</option><option value="Cotton">Cotton</option><option value="Chiffon">Chiffon</option><option value="Handloom">Handloom</option></select></label>
+          <label class="small">Description<textarea id="prodDesc" rows="3" placeholder="Short description"></textarea></label>
+          <label class="small">Upload Image<input id="prodImage" type="file" accept="image/*" /></label>
+          <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input id="prodPublished" type="checkbox" /> Publish (visible to users)</label>
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button class="btn primary" type="submit">Save Saree</button>
+            <button class="btn" id="btnClearForm" type="button">Clear</button>
+          </div>
+        </form>
+      </div>
+
+      <aside class="card">
+        <h4 style="margin:0 0 8px 0">Admin Actions</h4>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button id="btnExport" class="btn">Export Data (JSON)</button>
+          <button id="btnImport" class="btn">Import Data (JSON)</button>
+          <button id="btnSendEmail" class="btn">Send All Sarees via Email</button>
+          <button id="btnClearAll" class="btn ghost">Clear All Data</button>
+        </div>
+
+        <h4 style="margin-top:12px">Your Sarees</h4>
+        <div id="adminSarees"></div>
+      </aside>
+    </div>
   </div>
 
-  <!-- User Panel -->
-  <div id="userPanel" class="hide">
-    <h2>User Panel</h2>
-    <h3>My Cards</h3>
-    <div id="userCards"></div>
-    <button id="userLogoutBtn" class="danger">Logout</button>
-  </div>
+  <main>
+    <section class="content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div>
+          <h2 style="margin:0">All Sarees</h2>
+          <div class="small muted" id="countInfo">Showing 0 sarees</div>
+        </div>
+        <div class="flex">
+          <div class="chip" id="sortBox">Sort: <select id="sortSelect" style="border:none;background:transparent;font-size:13px"><option value="new">Newest</option><option value="price_asc">Price ↑</option><option value="price_desc">Price ↓</option></select></div>
+        </div>
+      </div>
 
-  <!-- Delivery Panel -->
-  <div id="deliveryPanel" class="hide">
-    <h2>Delivery Boy Panel</h2>
-    <h3>Assigned Cards</h3>
-    <div id="deliveryCards"></div>
-    <button id="deliveryLogoutBtn" class="danger">Logout</button>
-  </div>
+      <div id="productsGrid" class="productsGrid"></div>
+    </section>
 
+    <aside class="aside card">
+      <h3 style="margin-top:0">Cart</h3>
+      <div class="cartList" id="cartList">Cart empty</div>
+      <div style="margin-top:10px" class="small muted">Total: ₹ <span id="cartTotal">0</span></div>
+      <div style="margin-top:10px;display:flex;gap:8px">
+        <button id="btnCheckout" class="btn primary">Checkout (Mock)</button>
+        <button id="btnClearCart" class="btn">Clear</button>
+      </div>
+
+      <hr style="margin:12px 0" />
+      <div class="small muted">Tip: Deploy this file to Netlify. To enable cross-device sync, add Firebase config in the top of the script (FIREBASE_CONFIG).</div>
+    </aside>
+  </main>
+
+  <footer class="small muted card" style="margin-top:12px">
+    © Saree Bazaar — demo. Images stored as base64 in browser or Firebase if enabled.
+  </footer>
 </div>
 
-<!-- Firebase SDK -->
+<!-- Optional Firebase (for sync) -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
 <script>
-// ======= Firebase Setup =======
-const firebaseConfig = {
-  apiKey: "AIzaSyARRGuy8RIUifqadGxzF3BF3O4MAVFvfyo",
-  authDomain: "gasbooking-95fd5.firebaseapp.com",
-  databaseURL: "https://gasbooking-95fd5-default-rtdb.firebaseio.com",
-  projectId: "gasbooking-95fd5",
-  storageBucket: "gasbooking-95fd5.appspot.com",
-  messagingSenderId: "1025660657409",
-  appId: "1:1025660657409:web:84f0b8e44440e01f7ac500"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+/* ---------- CONFIG ---------- */
+const FIREBASE_CONFIG = null; // <-- paste your config object here to enable sync
 
-// ======= Data =======
-let members = [];
-let cards = [];
+/* ---------- STORAGE KEYS ---------- */
+const KEY_PRODUCTS = 'sb_products_v2';
+const KEY_CART = 'sb_cart_v2';
+const KEY_ADMIN = 'sb_admin_v2'; // stores { email, hash }
+const KEY_ORDERS = 'sb_orders_v1';
 
-// ======= Elements =======
-const loginPage=document.getElementById('loginPage');
-const roleSelect=document.getElementById('roleSelect');
-const userNameInput=document.getElementById('userNameInput');
-const loginBtn=document.getElementById('loginBtn');
+/* ---------- App State ---------- */
+let products = [];
+let cart = [];
+let isAdmin = false;
+let firebaseEnabled = false;
+let fbRef = null;
 
-const adminPanel=document.getElementById('adminPanel');
-const userPanel=document.getElementById('userPanel');
-const deliveryPanel=document.getElementById('deliveryPanel');
+/* ---------- Helpers ---------- */
+const $ = sel => document.querySelector(sel);
+const $$ = sel => Array.from(document.querySelectorAll(sel));
+function qs(id){ return document.getElementById(id); }
+function uid(prefix='p'){ return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,7); }
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-const societyName=document.getElementById('societyName');
-const memberName=document.getElementById('memberName');
-const phone=document.getElementById('phone');
-const address=document.getElementById('address');
-const addMemberBtn=document.getElementById('addMemberBtn');
-const selectMember=document.getElementById('selectMember');
-const gasNo=document.getElementById('gasNo');
-const payment=document.getElementById('payment');
-const startDate=document.getElementById('startDate');
-const endDate=document.getElementById('endDate');
-const barcodeFile=document.getElementById('barcodeFile');
-const createCardBtn=document.getElementById('createCardBtn');
-const allCardsAdmin=document.getElementById('allCardsAdmin');
-const adminLogoutBtn=document.getElementById('adminLogoutBtn');
-
-const userCards=document.getElementById('userCards');
-const userLogoutBtn=document.getElementById('userLogoutBtn');
-
-const deliveryCards=document.getElementById('deliveryCards');
-const deliveryLogoutBtn=document.getElementById('deliveryLogoutBtn');
-
-let currentUser='';
-
-// ======= Firebase Sync Functions =======
-function loadFirebaseData(){
-  // Members listener
-  db.ref('members').on('value', snapshot=>{
-    members = snapshot.val() ? Object.values(snapshot.val()) : [];
-    loadMembers(); loadUserCards(); loadDeliveryCards(); loadCardsAdmin();
-  });
-  // Cards listener
-  db.ref('cards').on('value', snapshot=>{
-    cards = snapshot.val() ? Object.values(snapshot.val()) : [];
-    loadUserCards(); loadDeliveryCards(); loadCardsAdmin();
-  });
+/* ---------- Web Crypto: simple SHA-256 hash (hex) ---------- */
+async function sha256hex(text){
+  const enc = new TextEncoder();
+  const data = enc.encode(text);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const bytes = Array.from(new Uint8Array(hash));
+  return bytes.map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
-function saveMemberFirebase(member){ db.ref('members/'+member.id).set(member); }
-function saveCardFirebase(card){ db.ref('cards/'+card.id).set(card); }
-function updateCardFirebase(card){ db.ref('cards/'+card.id).set(card); }
-function deleteCardFirebase(id){ db.ref('cards/'+id).remove(); }
-
-// ======= Login =======
-loginBtn.onclick=()=>{
-  const role=roleSelect.value; const name=userNameInput.value.trim();
-  if(!role||!name){ alert('Select role and enter name'); return; }
-  currentUser=name;
-  loginPage.classList.add('hide');
-  if(role==='admin'){adminPanel.classList.remove('hide');}
-  if(role==='user'){userPanel.classList.remove('hide');}
-  if(role==='delivery'){deliveryPanel.classList.remove('hide');}
-  loadFirebaseData();
-}
-
-// Logout
-adminLogoutBtn.onclick=()=>{location.reload();}
-userLogoutBtn.onclick=()=>{location.reload();}
-deliveryLogoutBtn.onclick=()=>{location.reload();}
-
-// ======= Admin Functions =======
-// Add Member
-addMemberBtn.onclick=()=>{
-  if(!societyName.value||!memberName.value||!phone.value){
-    alert('Fill all fields'); return;
+/* ---------- Init ---------- */
+document.addEventListener('DOMContentLoaded', async ()=>{
+  // try firebase init
+  if(FIREBASE_CONFIG){
+    try {
+      firebase.initializeApp(FIREBASE_CONFIG);
+      const db = firebase.database();
+      fbRef = db.ref('saree_bazaar_products_v1');
+      firebaseEnabled = true;
+      console.log('Firebase enabled — realtime sync ON');
+    } catch(e){ console.warn('Firebase init failed', e); firebaseEnabled = false; }
   }
-  const member={
-    id: Date.now(),
-    society: societyName.value,
-    name: memberName.value,
-    phone: phone.value,
-    address: address.value
-  };
-  // Save to Firebase
-  saveMemberFirebase(member);
-  // Instant UI update for dropdown (keeps same design; helps if listener is still loading)
-  members.push(member);
-  loadMembers();
 
-  societyName.value=''; memberName.value=''; phone.value=''; address.value='';
-  alert('Member Added');
+  loadLocal();
+  renderAll();
+  populateCategories();
+
+  // if firebase enabled, bind listeners
+  if(firebaseEnabled){
+    fbRef.once('value', snap=>{
+      const val = snap.val();
+      if(val){
+        products = Object.values(val).sort((a,b)=>b.createdAt - a.createdAt);
+        saveLocalProducts();
+        renderAll();
+      }
+    });
+    fbRef.on('child_added', snap=>{ handleFirebaseChild(snap.key, snap.val()); });
+    fbRef.on('child_changed', snap=>{ handleFirebaseChild(snap.key, snap.val()); });
+    fbRef.on('child_removed', snap=>{
+      const id = snap.key;
+      products = products.filter(p=>p.id !== id);
+      saveLocalProducts();
+      renderAll();
+    });
+  }
+
+  // wire up UI
+  qs('btnAdmin').addEventListener('click', adminToggle);
+  qs('btnLogout').addEventListener('click', ()=>{ logoutAdmin(); });
+  qs('productForm').addEventListener('submit', onSaveProduct);
+  qs('btnClearForm').addEventListener('click', clearForm);
+  qs('btnCart').addEventListener('click', ()=>{ window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'}); });
+  qs('btnCheckout').addEventListener('click', checkout);
+  qs('btnClearCart').addEventListener('click', ()=>{ if(confirm('Clear cart?')){ cart=[]; saveCart(); renderCart(); } });
+  qs('searchInput').addEventListener('input', renderAll);
+  qs('categoryFilter').addEventListener('change', renderAll);
+  qs('sortSelect').addEventListener('change', renderAll);
+  qs('btnExport').addEventListener('click', exportData);
+  qs('btnImport').addEventListener('click', importData);
+  qs('btnClearAll').addEventListener('click', clearAllData);
+  qs('btnSendEmail').addEventListener('click', sendAllSareesByEmail);
+
+  // admin: if no admin set, create on first click of Admin (handled in adminToggle)
+});
+
+/* ---------- Firebase child handler ---------- */
+function handleFirebaseChild(key, val){
+  if(!val) return;
+  val.id = key;
+  const idx = products.findIndex(p=>p.id === key);
+  if(idx === -1) products.unshift(val);
+  else products[idx] = val;
+  saveLocalProducts();
+  renderAll();
 }
 
-// Load members in select
-function loadMembers(){
-  selectMember.innerHTML='';
-  members.forEach(m=>{
-    const option=document.createElement('option');
-    option.value=m.id;
-    option.textContent=`${m.name} (${m.society})`;
-    selectMember.appendChild(option);
+/* ---------- Local load/save ---------- */
+function loadLocal(){
+  try{ products = JSON.parse(localStorage.getItem(KEY_PRODUCTS) || '[]'); } catch(e){ products = []; }
+  try{ cart = JSON.parse(localStorage.getItem(KEY_CART) || '[]'); } catch(e){ cart = []; }
+  // if no products, seed sample range of sarees
+  if(products.length === 0){ seedSample(); saveLocalProducts(); }
+}
+
+function saveLocalProducts(){
+  localStorage.setItem(KEY_PRODUCTS, JSON.stringify(products));
+  // if firebase enabled, mirror to firebase
+  if(firebaseEnabled){
+    const updates = {};
+    products.forEach(p=>{ updates[p.id] = p; });
+    fbRef.set(updates).catch(e=>console.warn('FB set failed', e));
+  }
+}
+
+function saveCart(){ localStorage.setItem(KEY_CART, JSON.stringify(cart)); }
+
+/* ---------- Sample Data (range of sarees) ---------- */
+function seedSample(){
+  const now = Date.now();
+  products = [
+    { id:'silk_1', title:'Pure Banarasi Silk', price:4500, category:'Silk', desc:'Traditional Banarasi silk with zari work.', image:'', published:true, createdAt: now-60000 },
+    { id:'cotton_1', title:'Handloom Cotton', price:850, category:'Cotton', desc:'Breathable handloom cotton for daily wear.', image:'', published:true, createdAt: now-50000 },
+    { id:'chiffon_1', title:'Chiffon Elegance', price:2200, category:'Chiffon', desc:'Lightweight chiffon saree with print.', image:'', published:true, createdAt: now-40000 },
+    { id:'handloom_1', title:'Ikat Handloom', price:3200, category:'Handloom', desc:'Artisan ikat weave saree.', image:'', published:true, createdAt: now-30000 },
+    { id:'silk_2', title:'Kanjeevaram Silk', price:6800, category:'Silk', desc:'Kanchipuram silk with temple border.', image:'', published:true, createdAt: now-20000 }
+  ];
+}
+
+/* ---------- Render UI ---------- */
+function populateCategories(){
+  const catSet = new Set(products.map(p=>p.category).filter(Boolean));
+  const sel = qs('categoryFilter');
+  sel.innerHTML = '<option value="">All Categories</option>';
+  Array.from(catSet).forEach(c=>{
+    const opt = document.createElement('option'); opt.value = c; opt.textContent = c; sel.appendChild(opt);
   });
 }
 
-// Create Card
-createCardBtn.onclick=()=>{
-  if(!selectMember.value||!gasNo.value||!payment.value||!startDate.value||!endDate.value){
-    alert('Fill all fields'); return;
-  }
-  const member=members.find(m=>String(m.id)===String(selectMember.value));
-  if(!member){ alert('Please add/select a member'); return; }
+function renderAll(){
+  populateCategories();
+  renderProducts();
+  renderCart();
+  renderAdminList();
+  const visibleCount = products.filter(p=>p.published).length;
+  qs('countInfo').textContent = `Showing ${visibleCount} sarees`;
+  updateAdminEmailDisplay();
+}
 
-  if(barcodeFile.files.length>0){
-    const reader=new FileReader();
-    reader.onload=(e)=> createCardFirebase(member,e.target.result);
-    reader.readAsDataURL(barcodeFile.files[0]);
+/* Products render with filters and sort */
+function renderProducts(){
+  const grid = qs('productsGrid');
+  grid.innerHTML = '';
+  const q = qs('searchInput').value.trim().toLowerCase();
+  const cat = qs('categoryFilter').value;
+  let list = products.filter(p=>p.published);
+  if(cat) list = list.filter(p=>p.category === cat);
+  if(q) list = list.filter(p => (p.title+p.desc+p.category).toLowerCase().includes(q));
+  const sort = qs('sortSelect').value;
+  if(sort === 'price_asc') list.sort((a,b)=>a.price-b.price);
+  else if(sort === 'price_desc') list.sort((a,b)=>b.price-a.price);
+  else list.sort((a,b)=>b.createdAt - a.createdAt);
+
+  if(list.length === 0){ grid.innerHTML = '<div class="card muted small">No sarees found</div>'; return; }
+
+  list.forEach(p=>{
+    const div = document.createElement('div'); div.className = 'product card';
+    div.innerHTML = `
+      <div class="img">${p.image ? `<img src="${p.image}" alt="${escapeHtml(p.title)}" />` : '<div class="small muted">No image</div>'}</div>
+      <div class="pbody">
+        <div class="title">${escapeHtml(p.title)}</div>
+        <div class="muted small">${escapeHtml(p.category)}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <div class="price">₹ ${p.price}</div>
+          <div>
+            <button class="btn" data-add="${p.id}">Add</button>
+            ${isAdmin ? `<button class="btn" data-edit="${p.id}">Edit</button>` : ''}
+          </div>
+        </div>
+        <div class="small muted" style="margin-top:8px">${escapeHtml(p.desc)}</div>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+
+  // handlers
+  grid.querySelectorAll('[data-add]').forEach(b=> b.addEventListener('click', ()=> addToCart(b.getAttribute('data-add')) ));
+  grid.querySelectorAll('[data-edit]').forEach(b=> b.addEventListener('click', ()=> { openEdit(b.getAttribute('data-edit')); }));
+}
+
+/* ---------- Admin list rendering ---------- */
+function renderAdminList(){
+  const container = qs('adminSarees');
+  if(!container) return;
+  container.innerHTML = '';
+  products.forEach(p=>{
+    const div = document.createElement('div'); div.className='card'; div.style.marginBottom='8px';
+    div.innerHTML = `
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="width:64px;height:48px;overflow:hidden;border-radius:8px;background:#f3f6fb"><img src="${p.image||''}" style="width:100%;height:100%;object-fit:cover" /></div>
+        <div style="flex:1">
+          <div style="font-weight:600">${escapeHtml(p.title)}</div>
+          <div class="muted small">₹ ${p.price} • ${escapeHtml(p.category)} • ${p.published ? 'Published' : 'Draft'}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button class="btn" data-edit="${p.id}">Edit</button>
+          <button class="btn" data-toggle="${p.id}">${p.published ? 'Unpublish' : 'Publish'}</button>
+          <button class="btn" data-delete="${p.id}">Delete</button>
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+  // attach actions
+  container.querySelectorAll('[data-edit]').forEach(b=> b.addEventListener('click', ()=> openEdit(b.getAttribute('data-edit')) ));
+  container.querySelectorAll('[data-toggle]').forEach(b=> b.addEventListener('click', ()=> togglePublish(b.getAttribute('data-toggle')) ));
+  container.querySelectorAll('[data-delete]').forEach(b=> b.addEventListener('click', ()=> deleteProduct(b.getAttribute('data-delete')) ));
+}
+
+/* ---------- Product CRUD ---------- */
+async function onSaveProduct(e){
+  e.preventDefault();
+  const id = qs('prodId').value || uid('s');
+  const title = qs('prodTitle').value.trim();
+  const price = Number(qs('prodPrice').value) || 0;
+  const category = qs('prodCategory').value || 'General';
+  const desc = qs('prodDesc').value.trim();
+  const published = qs('prodPublished').checked;
+  let imageData = null;
+
+  const file = qs('prodImage').files[0];
+  if(file){
+    imageData = await fileToDataURL(file);
   } else {
-    createCardFirebase(member,'');
+    const exist = products.find(p=>p.id === id);
+    if(exist) imageData = exist.image || '';
+  }
+
+  const item = { id, title, price, category, desc, image: imageData, published, createdAt: Date.now() };
+
+  const idx = products.findIndex(p=>p.id === id);
+  if(idx === -1) products.unshift(item);
+  else products[idx] = item;
+
+  saveLocalProducts();
+  clearForm();
+  renderAll();
+  alert('Saree saved locally' + (firebaseEnabled ? ' and synced to Firebase.' : ''));
+}
+
+function openEdit(id){
+  const p = products.find(x=>x.id===id);
+  if(!p) return alert('Not found');
+  qs('prodId').value = p.id;
+  qs('prodTitle').value = p.title;
+  qs('prodPrice').value = p.price;
+  qs('prodCategory').value = p.category;
+  qs('prodDesc').value = p.desc;
+  qs('prodPublished').checked = !!p.published;
+  alert('Image will remain same unless you upload a new one.');
+  window.scrollTo({top:0, behavior:'smooth'});
+  if(!isAdminActive()) { ensureAdminThenOpen(); }
+}
+
+function togglePublish(id){
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  p.published = !p.published;
+  saveLocalProducts(); renderAll();
+}
+
+function deleteProduct(id){
+  if(!confirm('Delete this saree permanently?')) return;
+  products = products.filter(p=>p.id !== id);
+  saveLocalProducts(); renderAll();
+}
+
+function clearForm(){
+  qs('prodId').value=''; qs('prodTitle').value=''; qs('prodPrice').value=''; qs('prodCategory').value='Silk';
+  qs('prodDesc').value=''; qs('prodImage').value=''; qs('prodPublished').checked=false;
+}
+
+/* ---------- File util ---------- */
+function fileToDataURL(file){
+  return new Promise((res, rej)=>{
+    const r = new FileReader();
+    r.onload = ()=> res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+/* ---------- Cart ---------- */
+function addToCart(id){
+  const p = products.find(x=>x.id===id);
+  if(!p) return alert('Product not found');
+  const exist = cart.find(c=>c.id===id);
+  if(exist) exist.qty++;
+  else cart.push({ id:p.id, title:p.title, price:p.price, qty:1 });
+  saveCart(); renderCart();
+}
+
+function renderCart(){
+  const box = qs('cartList'); box.innerHTML = '';
+  if(cart.length === 0){ box.textContent = 'Cart empty'; qs('cartCnt').textContent = '0'; qs('cartTotal').textContent = '0'; return; }
+  qs('cartCnt').textContent = cart.reduce((s,i)=>s+i.qty,0);
+  cart.forEach(ci=>{
+    const div = document.createElement('div'); div.style.display='flex'; div.style.justifyContent='space-between'; div.style.alignItems='center'; div.style.marginBottom='8px';
+    div.innerHTML = `<div style="flex:1">
+        <div style="font-weight:600">${escapeHtml(ci.title)}</div>
+        <div class="muted small">₹ ${ci.price} x <input type="number" min="1" value="${ci.qty}" data-qty="${ci.id}" style="width:60px;padding:4px;margin-left:6px" /></div>
+      </div>
+      <div><button class="btn" data-remove="${ci.id}">Remove</button></div>`;
+    box.appendChild(div);
+  });
+  box.querySelectorAll('[data-qty]').forEach(inp=> inp.addEventListener('change', ()=> {
+    const id = inp.getAttribute('data-qty'); updateQty(id, Number(inp.value));
+  }));
+  box.querySelectorAll('[data-remove]').forEach(b=> b.addEventListener('click', ()=> {
+    const id = b.getAttribute('data-remove'); cart = cart.filter(x=>x.id!==id); saveCart(); renderCart();
+  }));
+  const total = cart.reduce((s,i)=>s + (i.price * i.qty), 0);
+  qs('cartTotal').textContent = total;
+  qs('cartCnt').textContent = cart.reduce((s,i)=>s+i.qty,0);
+}
+
+function updateQty(id, qty){
+  const it = cart.find(c=>c.id===id);
+  if(!it) return;
+  it.qty = Math.max(1, qty);
+  saveCart(); renderCart();
+}
+
+function saveCart(){ localStorage.setItem(KEY_CART, JSON.stringify(cart)); }
+
+/* ---------- Checkout (mock) ---------- */
+function checkout(){
+  if(cart.length === 0) return alert('Cart is empty');
+  const total = cart.reduce((s,i)=>s + (i.price * i.qty), 0);
+  const name = prompt('Name for order:');
+  if(!name) return;
+  const phone = prompt('Phone (optional):');
+  if(!confirm(`Pay ₹ ${total} now? (Demo — no real payment)`)) return;
+  const order = { id: 'o_'+Date.now(), name, phone, items: cart, total, createdAt: Date.now() };
+  const orders = JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]');
+  orders.unshift(order);
+  localStorage.setItem(KEY_ORDERS, JSON.stringify(orders));
+  cart = []; saveCart(); renderCart();
+  alert('Order placed (demo). Order ID: ' + order.id);
+}
+
+/* ---------- Admin auth (client-side hashed) ---------- */
+/* Behavior:
+   - If no admin exists, first Admin click lets you create email+password
+   - Afterwards Admin click asks for email and password to login
+   - Login state persisted via localStorage key 'sb_admin_active' = '1'
+*/
+async function adminToggle(){
+  if(isAdminActive()){
+    qs('adminPanel').style.display = 'block';
+    isAdmin = true;
+    renderAll();
+    return;
+  }
+
+  const savedRaw = localStorage.getItem(KEY_ADMIN);
+  if(!savedRaw){
+    // create admin
+    const email = prompt('Set admin email (example@example.com):');
+    if(!email) { alert('Email required'); return; }
+    const pass = prompt('Set admin password (keep safe):');
+    if(!pass){ alert('Password required'); return; }
+    const pass2 = prompt('Confirm password:');
+    if(pass !== pass2){ alert('Passwords do not match'); return; }
+    const hash = await sha256hex(pass);
+    const data = { email: email.trim().toLowerCase(), hash };
+    localStorage.setItem(KEY_ADMIN, JSON.stringify(data));
+    alert('Admin created. Please login now.');
+  }
+
+  // now login flow
+  const stored = JSON.parse(localStorage.getItem(KEY_ADMIN));
+  const emailEnter = prompt('Admin email:');
+  if(!emailEnter) return;
+  const passEnter = prompt('Admin password:');
+  if(!passEnter) return;
+  const hashEnter = await sha256hex(passEnter);
+  if(stored && stored.email === emailEnter.trim().toLowerCase() && stored.hash === hashEnter){
+    localStorage.setItem('sb_admin_active','1');
+    localStorage.setItem('sb_admin_email', stored.email);
+    qs('adminPanel').style.display = 'block';
+    isAdmin = true;
+    renderAll();
+  } else alert('Wrong email or password');
+}
+
+function isAdminActive(){ return localStorage.getItem('sb_admin_active') === '1'; }
+
+function logoutAdmin(){ localStorage.removeItem('sb_admin_active'); localStorage.removeItem('sb_admin_email'); isAdmin = false; qs('adminPanel').style.display = 'none'; renderAll(); }
+
+/* ensure admin then open edit */
+function ensureAdminThenOpen(){
+  adminToggle();
+}
+
+/* ---------- Import / Export / Clear ---------- */
+function exportData(){
+  const data = { products, cart, orders: JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]') };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'saree_bazaar_export.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(){
+  const input = document.createElement('input'); input.type='file'; input.accept='application/json';
+  input.onchange = e=>{
+    const f = e.target.files[0];
+    if(!f) return;
+    const r = new FileReader();
+    r.onload = ()=> {
+      try {
+        const data = JSON.parse(r.result);
+        if(Array.isArray(data.products)) products = data.products;
+        if(Array.isArray(data.cart)) cart = data.cart;
+        saveLocalProducts(); saveCart(); renderAll();
+        alert('Import successful');
+      } catch(err){ alert('Import failed: ' + err.message); }
+    };
+    r.readAsText(f);
+  };
+  input.click();
+}
+
+function clearAllData(){
+  if(!confirm('Clear all products, cart & orders? This cannot be undone.')) return;
+  localStorage.removeItem(KEY_PRODUCTS); localStorage.removeItem(KEY_CART); localStorage.removeItem(KEY_ORDERS);
+  products = []; cart = [];
+  saveLocalProducts(); saveCart(); renderAll();
+}
+
+/* ---------- Admin email display ---------- */
+function updateAdminEmailDisplay(){
+  const el = qs('adminEmailShow');
+  const email = localStorage.getItem('sb_admin_email') || null;
+  if(isAdminActive() && email){
+    el.textContent = 'Logged in as: ' + email;
+  } else {
+    el.textContent = 'Not logged in';
   }
 }
 
-function createCardFirebase(member,barcode){
-  const card={
-    id: Date.now(),
-    memberId: member.id,
-    name: member.name,
-    society: member.society,
-    phone: member.phone,
-    address: member.address,
-    gasNo: gasNo.value,
-    payment: payment.value,
-    startDate: startDate.value,
-    endDate: endDate.value,
-    status: 'Pending',
-    barcode: barcode
-  };
-  saveCardFirebase(card);
-  gasNo.value=''; payment.value=''; startDate.value=''; endDate.value=''; barcodeFile.value='';
-}
+/* ---------- Send all sarees via email (mailto) ---------- */
+function sendAllSareesByEmail(){
+  if(!isAdminActive()){
+    alert('Please login as admin to send email');
+    return;
+  }
+  const adminEmail = localStorage.getItem('sb_admin_email') || '';
+  const to = prompt('Recipient email (leave empty to send to admin):', adminEmail) || adminEmail;
+  if(!to){ alert('Recipient email required'); return; }
 
-// ======= Card Operations =======
-function markDelivered(id){
-  const c=cards.find(x=>x.id===id);
-  if(c){ c.status='Delivered'; updateCardFirebase(c); }
-}
-function deleteCard(id){ deleteCardFirebase(id); }
-
-// ======= Panels Rendering =======
-function loadCardsAdmin(){
-  allCardsAdmin.innerHTML='';
-  cards.forEach(c=>{
-    const cardDiv=document.createElement('div'); cardDiv.className='card';
-    cardDiv.innerHTML=`<div class="card-info">
-      <strong>${c.name} (${c.society})</strong><br>
-      Phone: ${c.phone}<br>Address: ${c.address}<br>
-      Gas No: ${c.gasNo}<br>Payment: Rs ${c.payment}<br>
-      Start: ${c.startDate} End: ${c.endDate}<br>
-      Status: <span class="status-badge ${c.status==='Pending'?'status-pending':'status-delivered'}">${c.status}</span>
-    </div>
-    <div class="card-actions">
-      <button class="success" onclick="markDelivered(${c.id})">Delivered</button>
-      <button class="danger" onclick="deleteCard(${c.id})">Delete</button>
-    </div>`;
-    allCardsAdmin.appendChild(cardDiv);
+  // Build a simple text list (CSV-like)
+  const lines = ['Title,Category,Price,Published,Description'];
+  products.forEach(p=>{
+    const row = [
+      `"${(p.title||'').replace(/"/g,'""')}"`,
+      `"${(p.category||'').replace(/"/g,'""')}"`,
+      p.price || 0,
+      p.published ? 'Yes' : 'No',
+      `"${(p.desc||'').replace(/"/g,'""')}"`
+    ];
+    lines.push(row.join(','));
   });
+  const body = encodeURIComponent(lines.join('\n'));
+  const subject = encodeURIComponent('Saree Bazaar — All Sarees List');
+  // mailto link (note: mailto length limits in some clients)
+  const mailto = `mailto:${encodeURIComponent(to)}?subject=${subject}&body=${body}`;
+  window.location.href = mailto;
 }
 
-function loadUserCards(){
-  userCards.innerHTML='';
-  const userCardsList=cards.filter(c=>c.name===currentUser);
-  userCardsList.forEach(c=>{
-    const cardDiv=document.createElement('div'); cardDiv.className='card';
-    cardDiv.innerHTML=`<div class="card-info">
-      <strong>${c.name} (${c.society})</strong><br>
-      Gas No: ${c.gasNo}<br>
-      Payment: Rs ${c.payment}<br>
-      Status: <span class="status-badge ${c.status==='Pending'?'status-pending':'status-delivered'}">${c.status}</span><br>
-      Start: ${c.startDate} End: ${c.endDate}<br>
-      ${c.barcode?'<img src="'+c.barcode+'" alt="Barcode" style="max-width:150px;margin-top:5px;">':''}
-    </div>`;
-    userCards.appendChild(cardDiv);
-  });
-}
+/* ---------- Utility: ensure UI reflects admin state ---------- */
+setInterval(()=>{ // small heartbeat to keep admin area displayed if logged in
+  if(isAdminActive()){ qs('adminPanel').style.display = 'block'; isAdmin = true; } else { qs('adminPanel').style.display = 'none'; isAdmin=false; }
+  updateAdminEmailDisplay();
+}, 800);
 
-function loadDeliveryCards(){
-  deliveryCards.innerHTML='';
-  const today=new Date().toISOString().split('T')[0];
-  const pendingCards=cards.filter(c=>c.status==='Pending' && c.startDate<=today && c.endDate>=today);
-  pendingCards.forEach(c=>{
-    const cardDiv=document.createElement('div'); cardDiv.className='card';
-    cardDiv.innerHTML=`<div class="card-info">
-      <strong>${c.name} (${c.society})</strong><br>
-      Gas No: ${c.gasNo}<br>Phone: ${c.phone}<br>Address: ${c.address}<br>
-      Status: <span class="status-badge status-pending">${c.status}</span><br>
-      ${c.barcode?'<img src="'+c.barcode+'" alt="Barcode" style="max-width:150px;margin-top:5px;">':''}
-    </div>
-    <div class="card-actions">
-      <button class="success" onclick="markDelivered(${c.id})">Delivered</button>
-    </div>`;
-    deliveryCards.appendChild(cardDiv);
-  });
-}
+/* ---------- End ---------- */
 </script>
 </body>
 </html>
